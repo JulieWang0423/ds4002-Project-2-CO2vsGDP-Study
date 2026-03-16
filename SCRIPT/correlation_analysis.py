@@ -89,7 +89,7 @@ for i, country in enumerate(sorted(df["name"].unique())):
     rho_val = results_df.loc[results_df["Country"] == country, "Spearman_rho"].values[0]
     ax.set_title(f"{country}\nr={r_val}, ρ={rho_val}", fontsize=12)
     ax.set_xlabel("GDP per capita (2021 int'l $)")
-    ax.set_ylabel("CO₂ per capita (tonnes)")
+    ax.set_ylabel("CO2 per capita (tonnes)")
 for j in range(i + 1, len(axes)):
     axes[j].set_visible(False)
 
