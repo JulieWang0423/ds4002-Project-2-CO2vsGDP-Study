@@ -18,7 +18,6 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 warnings.filterwarnings("ignore")
 
-# ── 0. CONFIG ────────────────────────────────────────────────────────
 COUNTRIES = ["USA", "China", "India", "Germany", "Brazil", "South Africa"]
 TRAIN_END = 2010  # train up through this year
 TEST_START = 2011
@@ -27,13 +26,10 @@ DATA_START = 1900  # use 1900+ for all countries
 FORECAST_HORIZON = 10  # forecast 10 years beyond 2022
 
 OUTPUT_DIR = "/Users/sihewang/PycharmProjects/ds4002-Project-2-CO2vsGDP-Study/OUTPUT"
-
-# ── 1. LOAD DATA ─────────────────────────────────────────────────────
 co2_raw = pd.read_csv("/Users/sihewang/PycharmProjects/ds4002-Project-2-CO2vsGDP-Study/DATA/co2_pcap_cons.csv", encoding="utf-8-sig")
 
-
 def extract_series(df, country_name, start, end):
-    """Extract a time series for one country, dropping leading NaNs."""
+    # There are some leading NaNs for China's data so we're dropping them
     row = df[df["name"] == country_name]
     year_cols = [str(y) for y in range(start, end + 1)]
     available = [c for c in year_cols if c in df.columns]
@@ -46,10 +42,9 @@ def extract_series(df, country_name, start, end):
     ts = ts.ffill()
     return ts
 
-
-# ── 2. MANUAL GRID SEARCH (replaces pmdarima) ────────────────────────
 def find_best_arima_order(train_data, max_p=4, max_d=2, max_q=4):
     """
+    Alternate method to replace pmdarima because it doesn't work for me.
     Grid search over ARIMA(p,d,q) orders and return the one with lowest AIC.
     This replaces auto_arima from pmdarima so no extra dependency is needed.
     """
@@ -87,11 +82,7 @@ def find_best_arima_order(train_data, max_p=4, max_d=2, max_q=4):
     return best_order
 
 
-# ── 3. STATIONARITY TESTING ──────────────────────────────────────────
-print("=" * 65)
-print("STEP 1: AUGMENTED DICKEY-FULLER STATIONARITY TESTS")
-print("=" * 65)
-
+# Stationary testing
 for country in COUNTRIES:
     ts = extract_series(co2_raw, country, DATA_START, TEST_END)
     adf_stat, p_val, _, _, crit, _ = adfuller(ts.dropna(), autolag="AIC")
@@ -104,11 +95,7 @@ for country in COUNTRIES:
     print(f"  {'':15s}  After d=1: ADF={adf2:+.3f}  p={p2:.4f}  [{d1_status}]")
 print()
 
-# ── 4. FIT SARIMA MODELS ─────────────────────────────────────────────
-print("=" * 65)
-print("STEP 2: GRID SEARCH ORDER SELECTION + SARIMA FITTING")
-print("=" * 65)
-
+# SARIMA fitting
 results = {}
 all_forecasts = {}
 
@@ -126,15 +113,11 @@ for i, country in enumerate(COUNTRIES):
 
     print(f"  Train: {train.index[0].year}-{train.index[-1].year} ({len(train)} obs)")
     print(f"  Test:  {test.index[0].year}-{test.index[-1].year} ({len(test)} obs)")
-
-    # Find best order via grid search
-    print(f"  Running grid search (this may take a minute)...")
     order = find_best_arima_order(train)
     print(f"  Best order: ARIMA{order}")
 
     # Fit on training data
-    model = SARIMAX(train, order=order,
-                    enforce_stationarity=False, enforce_invertibility=False)
+    model = SARIMAX(train, order=order, enforce_stationarity=False, enforce_invertibility=False)
     fit = model.fit(disp=False)
 
     aic = fit.aic
@@ -174,7 +157,7 @@ for i, country in enumerate(COUNTRIES):
         "fit": fit,
     }
 
-    # ── PLOT: Actual vs Forecast ──
+    # Plot
     ax = axes_sc[i]
     ax.plot(train.index, train, color="steelblue", label="Train", linewidth=1)
     ax.plot(test.index, test, color="black", label="Actual (test)", linewidth=2)
@@ -192,7 +175,7 @@ for i, country in enumerate(COUNTRIES):
     ax.axvline(pd.Timestamp(f"{TRAIN_END}-01-01"), color="gray",
                linestyle=":", alpha=0.6)
 
-    # ── RESIDUAL DIAGNOSTICS ──
+    # Residual Diagnostic
     residuals = fit.resid
 
     axes_diag[i, 0].plot(residuals, color="steelblue", linewidth=0.8)
@@ -220,18 +203,12 @@ fig_diag_all.savefig(os.path.join(OUTPUT_DIR, "sarima_residual_diagnostics.png")
                      dpi=200, bbox_inches="tight")
 plt.close(fig_diag_all)
 
-# ── 5. SUMMARY TABLE ─────────────────────────────────────────────────
-print("\n" + "=" * 65)
-print("SUMMARY TABLE")
-print("=" * 65)
-
+# Print summary table
 summary_df = pd.DataFrame(results).T.reset_index().rename(columns={"index": "Country"})
 summary_df["order"] = summary_df["order"].astype(str)
 print(summary_df.to_string(index=False))
-
 summary_df.to_csv(os.path.join(OUTPUT_DIR, "sarima_summary.csv"), index=False)
 
-print("\n" + "-" * 55)
 print("Outputs saved:")
 print("  - sarima_summary.csv")
 print("  - sarima_forecasts.png")
