@@ -7,7 +7,30 @@ tbd
 ```
 
 ## Section 2: A Map of your documentation.
-In this section, you should provide an outline or tree illustrating the hierarchy of folders and subfolders contained in your Project Folder, and listing the files stored in each folder or subfolder.
+```
+.
+├── DATA
+│   ├── co2_pcap_cons.csv
+│   └── gdp_pcap.csv
+├── LICENSE
+├── OUTPUT
+│   ├── arimax_forecasts.png
+│   ├── arimax_vs_sarima_comparison.csv
+│   ├── co2_correlation_heatmap.png
+│   ├── correlation_results.csv
+│   ├── sarima_forecasts.png
+│   ├── sarima_residual_diagnostics.png
+│   ├── sarima_summary.csv
+│   ├── sarima_vs_arimax_comparison.png
+│   ├── scatter_regression.png
+│   └── time_series_overlay.png
+├── README.md
+└── SCRIPT
+    ├── ARIMAX_analysis.py
+    ├── EDA.ipynb
+    ├── SARIMA_analysis.py
+    └── correlation_analysis.py
+```
 ## Section 3: Instructions for reproducing your results. 
 EDA:
 1. replace
