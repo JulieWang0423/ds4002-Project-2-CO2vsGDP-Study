@@ -3,7 +3,10 @@ For this analysis, we will look at select countries: U.S., Brazil, Germany, Indi
 ## Section 1: Software and platform section
 For this project, our team members used Apple Mac OS but can be easily reproduced in any operating system due to the cross-platform nature of Python. The notebooks are written in Visual Studio Code and can be ran with the following dependencies:
 ```
-tbd
+pip install plotly
+pip install pandas
+pip install scikit-learn
+pip install statsmodels
 ```
 
 ## Section 2: A Map of your documentation.
@@ -32,22 +35,9 @@ tbd
     └── correlation_analysis.py
 ```
 ## Section 3: Instructions for reproducing your results. 
-EDA:
-1. replace
-2. these
-3. steps
 
-Correlation:
-1. replace
-2. these
-3. steps
+For each of the models, perform the following:
 
-SARIMA:
-1. replace
-2. these
-3. steps
-
-ARIMAX:
-1. replace
-2. these
-3. steps
+1. Open this repo in a Python environment like VSCode, Spyder, or Jupyter notebook.
+2. Install the dependencies presented in section 1.
+3. Run the script or notebook.
